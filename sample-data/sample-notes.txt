@@ -1,0 +1,11 @@
+Introduction to Elasticity of Demand
+
+Price elasticity of demand measures how the quantity demanded of a good responds to a change in its price. It is calculated as the percentage change in quantity demanded divided by the percentage change in price.
+
+Goods with elastic demand (elasticity > 1) see quantity demanded change proportionally more than price. Luxury goods and goods with many substitutes tend to be elastic. Goods with inelastic demand (elasticity < 1) see quantity demanded change proportionally less than price. Necessities and goods with few substitutes, such as insulin or salt, tend to be inelastic.
+
+Key determinants of elasticity include availability of substitutes, the proportion of income spent on the good, time horizon (demand tends to become more elastic over longer periods as consumers find substitutes), and whether the good is a necessity or luxury.
+
+Cross-price elasticity measures how the quantity demanded of one good responds to a price change in another good. A positive cross-price elasticity indicates substitute goods; a negative cross-price elasticity indicates complementary goods.
+
+Income elasticity of demand measures how quantity demanded responds to changes in consumer income. Normal goods have positive income elasticity; inferior goods have negative income elasticity.
