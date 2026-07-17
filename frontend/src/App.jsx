@@ -7,7 +7,7 @@ import Quiz from "./pages/Quiz";
 
 function RequireAuth({ children }) {
   const { session, loading } = useAuth();
-  if (loading) return <div className="container">Loading...</div>;
+  if (loading) return <div className="container muted">Loading your study space...</div>;
   if (!session) return <Navigate to="/login" replace />;
   return children;
 }

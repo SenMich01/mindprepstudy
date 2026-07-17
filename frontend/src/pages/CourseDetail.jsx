@@ -87,17 +87,20 @@ export default function CourseDetail() {
     }
   }
 
-  if (!course) return <div className="container">Loading...</div>;
+  if (!course) return <div className="container muted">Opening course...</div>;
 
   const latestPack = revisionPacks[0];
 
   return (
-    <div className="container">
-      <Link to="/courses">&larr; All courses</Link>
-      <h1>{course.name}</h1>
+    <main className="container">
+      <Link className="back-link" to="/courses">← All courses</Link>
+      <header className="page-header">
+        <div><p className="eyebrow">Course workspace</p><h1>{course.name}</h1><p className="subtitle">Add your materials, then turn them into focused practice.</p></div>
+      </header>
 
-      <div className="card">
-        <h3>Add material</h3>
+      <div className="detail-grid">
+        <section className="card">
+          <div className="section-title"><span className="section-icon">✎</span><div><h3>Add material</h3><p className="muted">Paste notes or upload a course file.</p></div></div>
         <form onSubmit={handlePasteSubmit}>
           <textarea
             rows={4}
@@ -105,41 +108,39 @@ export default function CourseDetail() {
             value={pastedText}
             onChange={(e) => setPastedText(e.target.value)}
           />
-          <button type="submit" disabled={busy}>Add pasted text</button>
+          <button type="submit" disabled={busy}>Add notes</button>
         </form>
-        <p style={{ marginTop: "1rem" }}>Or upload a file (.pdf, .docx, .pptx):</p>
+        <p className="material-caption">Or upload a PDF, DOCX, or PPTX</p>
         <input type="file" accept=".pdf,.docx,.pptx" onChange={handleFileUpload} disabled={busy} />
-        <p>{documents.length} document(s) added</p>
+        <p className="document-count">{documents.length} {documents.length === 1 ? "source" : "sources"} ready</p>
+        </section>
+
+        <aside className="card card-accent">
+          <div className="section-title"><span className="section-icon">✦</span><div><h3>Ready to revise?</h3><p className="muted">Create an AI-guided pack and quiz.</p></div></div>
+          <div className="action-stack">
+            <button className="button-light" onClick={handleGeneratePack} disabled={busy || documents.length === 0}>{busy ? "Working..." : "Generate revision pack"}</button>
+            <button className="button-light" onClick={handleGenerateQuiz} disabled={busy || !latestPack}>Generate quiz</button>
+            <Link className="button button-light" to={`/courses/${id}/quiz`}>Take quiz →</Link>
+          </div>
+        </aside>
       </div>
 
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
+      {error && <p className="notice">{error}</p>}
 
-      <div className="card">
-        <h3>Revision Pack</h3>
-        <button onClick={handleGeneratePack} disabled={busy || documents.length === 0}>
-          {busy ? "Working..." : "Generate Revision Pack"}
-        </button>
-
-        {latestPack && (
-          <div style={{ marginTop: "1rem" }}>
+      <section className="card">
+        <div className="section-title"><span className="section-icon">▤</span><div><h3>Revision pack</h3><p className="muted">Your key concepts, explanations, and memory hooks.</p></div></div>
+        {latestPack ? (
+          <div>
             {latestPack.content_json.concepts?.map((c, i) => (
-              <div key={i} style={{ marginBottom: "1rem" }}>
+              <div className="concept" key={i}>
                 <strong>{c.title}</strong>
                 <p>{c.explanation}</p>
-                {c.mnemonic && <p><em>Mnemonic: {c.mnemonic}</em></p>}
+                {c.mnemonic && <p className="mnemonic"><em>Memory hook: {c.mnemonic}</em></p>}
               </div>
             ))}
           </div>
-        )}
-      </div>
-
-      <div className="card">
-        <h3>Quiz</h3>
-        <button onClick={handleGenerateQuiz} disabled={busy || !latestPack}>
-          Generate Quiz
-        </button>
-        <Link to={`/courses/${id}/quiz`}><button style={{ marginLeft: "0.5rem" }}>Take Quiz</button></Link>
-      </div>
-    </div>
+        ) : <p className="muted">Your generated revision pack will appear here.</p>}
+      </section>
+    </main>
   );
 }

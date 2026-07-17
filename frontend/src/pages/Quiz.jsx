@@ -7,6 +7,8 @@ export default function Quiz() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
+  const [focusedPack, setFocusedPack] = useState(null);
+  const [generatingFocusedPack, setGeneratingFocusedPack] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -39,38 +41,91 @@ export default function Quiz() {
     }
   }
 
+  async function handleFocusedRegeneration() {
+    setError(null);
+    setGeneratingFocusedPack(true);
+
+    try {
+      const data = await apiFetch(`/generate/${id}/pack`, {
+        method: "POST",
+        body: JSON.stringify({ focusTopics: result.weakTopics }),
+      });
+      setFocusedPack(data.revisionPack);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setGeneratingFocusedPack(false);
+    }
+  }
+
   if (result) {
     return (
-      <div className="container">
-        <h1>Score: {result.score}%</h1>
+      <main className="container">
+        <section className="score-hero"><p className="score-label">Quiz complete</p><h1>{result.score}%</h1><p>Here’s where to focus next.</p></section>
         {result.weakTopics.length > 0 ? (
           <div className="card">
-            <h3>Weak topics</h3>
-            <ul>
+            <div className="section-title"><span className="section-icon">◎</span><div><h3>Strengthen these topics</h3><p className="muted">A focused pack can help you close the gaps.</p></div></div>
+            <ul className="topic-list">
               {result.weakTopics.map((t) => <li key={t}>{t}</li>)}
             </ul>
+            <button
+              onClick={handleFocusedRegeneration}
+              disabled={generatingFocusedPack}
+            >
+              {generatingFocusedPack
+                ? "Generating focused revision pack..."
+                : "Generate a pack for these weak topics"}
+            </button>
           </div>
         ) : (
           <p>No weak topics — nice work!</p>
         )}
-        <Link to={`/courses/${id}`}>&larr; Back to course</Link>
-      </div>
+
+        {error && <p className="notice">{error}</p>}
+
+        {focusedPack && (
+          <div className="card">
+            <div className="section-title"><span className="section-icon">✦</span><div><h3>Focused revision pack</h3><p className="muted">Built around the topics you missed.</p></div></div>
+            {focusedPack.content_json.concepts?.map((concept, index) => (
+              <div className="concept" key={index}>
+                <strong>{concept.title}</strong>
+                <p>{concept.explanation}</p>
+                {concept.mnemonic && <p><em>Mnemonic: {concept.mnemonic}</em></p>}
+              </div>
+            ))}
+            {focusedPack.content_json.predictedQuestions?.length > 0 && (
+              <div>
+                <h4>Predicted questions</h4>
+                {focusedPack.content_json.predictedQuestions.map((item, index) => (
+                  <div key={index} style={{ marginBottom: "1rem" }}>
+                    <strong>{item.question}</strong>
+                    <p>{item.modelAnswer}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <Link className="back-link" to={`/courses/${id}`}>← Back to course</Link>
+      </main>
     );
   }
 
   return (
-    <div className="container">
-      <Link to={`/courses/${id}`}>&larr; Back to course</Link>
-      <h1>Quiz</h1>
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
+    <main className="container">
+      <Link className="back-link" to={`/courses/${id}`}>← Back to course</Link>
+      <header className="page-header"><div><p className="eyebrow">Self-check</p><h1>Knowledge check</h1><p className="subtitle">Take your time—your results will shape the next revision pack.</p></div></header>
+      <div className="quiz-meta"><span>✦ {questions.length} questions</span><span>•</span><span>Answer every question</span></div>
+      {error && <p className="notice">{error}</p>}
 
       <form onSubmit={handleSubmit}>
         {questions.map((q) => (
-          <div className="card" key={q.id}>
-            <p><strong>{q.question}</strong></p>
+          <div className="card quiz-question" key={q.id}>
+            <span className="question-number">Question {questions.indexOf(q) + 1}</span>
+            <p className="question-text"><strong>{q.question}</strong></p>
             {q.type === "mcq" ? (
               q.options.map((opt) => (
-                <label key={opt} style={{ display: "block", marginBottom: "0.4rem" }}>
+                <label className="answer-option" key={opt}>
                   <input
                     type="radio"
                     name={q.id}
@@ -90,8 +145,8 @@ export default function Quiz() {
           </div>
         ))}
 
-        {questions.length > 0 && <button type="submit">Submit Quiz</button>}
+        {questions.length > 0 && <button type="submit">Submit answers →</button>}
       </form>
-    </div>
+    </main>
   );
 }

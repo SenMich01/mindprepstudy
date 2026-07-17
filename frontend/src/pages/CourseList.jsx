@@ -40,29 +40,39 @@ export default function CourseList() {
   }
 
   return (
-    <div className="container">
-      <h1>Your Courses</h1>
+    <main className="container">
+      <header className="page-header">
+        <div>
+          <p className="eyebrow">Your study space</p>
+          <h1>Courses, made clearer.</h1>
+          <p className="subtitle">Keep every lecture, revision pack, and quiz in one focused place.</p>
+        </div>
+        <div className="course-symbol">✦</div>
+      </header>
 
-      <form className="card" onSubmit={handleCreate}>
+      <form className="card create-course" onSubmit={handleCreate}>
         <input
           placeholder="e.g. Intro to Macroeconomics"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <button type="submit">Create Course</button>
+        <button type="submit">+ New course</button>
       </form>
 
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
-      {loading && <p>Loading...</p>}
+      {error && <p className="notice">{error}</p>}
+      {loading && <p className="muted">Loading your courses...</p>}
 
-      {courses.map((course) => (
-        <Link key={course.id} to={`/courses/${course.id}`} className="card" style={{ display: "block" }}>
-          <strong>{course.name}</strong>
-          {course.description && <p>{course.description}</p>}
-        </Link>
-      ))}
+      <section className="course-grid">
+        {courses.map((course) => (
+          <Link key={course.id} to={`/courses/${course.id}`} className="card course-card">
+            <span className="course-arrow">↗</span><span className="course-symbol">◌</span>
+            <strong>{course.name}</strong>
+            <p>{course.description || "Add course materials to start building your revision pack."}</p>
+          </Link>
+        ))}
+      </section>
 
-      {!loading && courses.length === 0 && <p>No courses yet — create one above to get started.</p>}
-    </div>
+      {!loading && courses.length === 0 && <div className="empty-state">Your study space is ready. Create your first course to begin.</div>}
+    </main>
   );
 }

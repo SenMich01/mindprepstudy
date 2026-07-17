@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase.js";
-import { requireAuth } from "../lib/auth.js";
+import { requireAuth, requireCourseOwner } from "../lib/auth.js";
 import { generateRevisionPack, generateQuiz } from "../services/openai.js";
 
 export const generateRouter = Router();
 generateRouter.use(requireAuth);
+generateRouter.use("/:courseId", requireCourseOwner);
 
 // Concatenates all document text for a course. Simple truncation guard for
 // now — replace with a smarter token-budget strategy if courses grow large.

@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase.js";
-import { requireAuth } from "../lib/auth.js";
+import { requireAuth, requireCourseOwner } from "../lib/auth.js";
 
 export const quizRouter = Router();
 quizRouter.use(requireAuth);
+quizRouter.use("/:courseId", requireCourseOwner);
 
 // Get all quiz questions for a course
 quizRouter.get("/:courseId", async (req, res) => {
@@ -27,12 +28,25 @@ quizRouter.post("/:courseId/submit", async (req, res) => {
   }
 
   const questionIds = answers.map((a) => a.questionId);
+  if (new Set(questionIds).size !== questionIds.length) {
+    return res.status(400).json({ error: "Each quiz question can only be answered once" });
+  }
+
   const { data: questions, error: qError } = await supabase
     .from("quiz_questions")
     .select("*")
-    .in("id", questionIds);
+    .eq("course_id", courseId);
 
   if (qError) return res.status(500).json({ error: qError.message });
+  if (!questions?.length) return res.status(404).json({ error: "No quiz questions found" });
+
+  const expectedIds = new Set(questions.map((q) => q.id));
+  if (
+    questionIds.length !== expectedIds.size ||
+    questionIds.some((questionId) => !expectedIds.has(questionId))
+  ) {
+    return res.status(400).json({ error: "Answer every question in this quiz before submitting" });
+  }
 
   const questionById = Object.fromEntries(questions.map((q) => [q.id, q]));
   let correctCount = 0;
@@ -46,10 +60,10 @@ quizRouter.post("/:courseId/submit", async (req, res) => {
       question.correct_answer.trim().toLowerCase() === String(answer).trim().toLowerCase();
 
     if (isCorrect) correctCount += 1;
-    else weakTopics.add(question.topic);
+    else if (question.topic) weakTopics.add(question.topic);
   }
 
-  const score = Math.round((correctCount / answers.length) * 100);
+  const score = Math.round((correctCount / questions.length) * 100);
 
   const { data: attempt, error: attemptError } = await supabase
     .from("quiz_attempts")

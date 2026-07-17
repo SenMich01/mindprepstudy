@@ -45,11 +45,21 @@ export default function Login() {
   }
 
   return (
-    <div className="container">
-      <h1>MindPrepStudy</h1>
-      <p>Turn your notes into an exam-ready revision pack and quiz.</p>
-
-      <form className="card" onSubmit={handleSubmit}>
+    <main className="auth-page">
+      <div className="auth-panel">
+        <section className="auth-intro">
+          <div className="brand"><span className="brand-mark">M</span> MindPrepStudy</div>
+          <div className="auth-copy">
+            <p className="eyebrow" style={{ color: "#b9aefe" }}>Study with intention</p>
+            <h1>Your clearest path to exam day.</h1>
+            <p>Turn lecture notes and course files into focused revision packs, smart quizzes, and a plan for what to study next.</p>
+          </div>
+        </section>
+        <section className="auth-form">
+          <p className="eyebrow">Welcome</p>
+          <h2>{mode === "sign-in" ? "Pick up where you left off" : "Start your study space"}</h2>
+          <p className="muted">{mode === "sign-in" ? "Sign in to continue your revision." : "Create an account to keep your courses organised."}</p>
+          <form onSubmit={handleSubmit}>
         <input
           type="email"
           placeholder="Email"
@@ -64,19 +74,21 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
-        {notice && <p style={{ color: "#166534" }}>{notice}</p>}
+        {error && <p className="notice">{error}</p>}
+        {notice && <p className="notice success">{notice}</p>}
         <button type="submit" disabled={loading}>
           {loading ? "Please wait..." : mode === "sign-in" ? "Sign in" : "Sign up"}
         </button>
-      </form>
+          </form>
 
-      <button
-        style={{ background: "transparent", color: "#111", textDecoration: "underline" }}
+          <button
+        className="auth-switch"
         onClick={() => setMode(mode === "sign-in" ? "sign-up" : "sign-in")}
-      >
+          >
         {mode === "sign-in" ? "Need an account? Sign up" : "Already have an account? Sign in"}
-      </button>
-    </div>
+          </button>
+        </section>
+      </div>
+    </main>
   );
 }

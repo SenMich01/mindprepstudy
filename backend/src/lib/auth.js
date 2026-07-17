@@ -21,3 +21,23 @@ export async function requireAuth(req, res, next) {
   req.user = data.user;
   next();
 }
+
+/**
+ * Confirms that the course in the current route belongs to the authenticated
+ * user. The backend uses a service-role client, so this check is required
+ * before accessing course-linked data.
+ */
+export async function requireCourseOwner(req, res, next) {
+  const courseId = req.params.courseId;
+  const { data, error } = await supabase
+    .from("courses")
+    .select("id")
+    .eq("id", courseId)
+    .eq("user_id", req.user.id)
+    .maybeSingle();
+
+  if (error) return res.status(500).json({ error: error.message });
+  if (!data) return res.status(404).json({ error: "Course not found" });
+
+  next();
+}

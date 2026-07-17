@@ -1,13 +1,14 @@
 import { Router } from "express";
 import multer from "multer";
 import { supabase } from "../lib/supabase.js";
-import { requireAuth } from "../lib/auth.js";
+import { requireAuth, requireCourseOwner } from "../lib/auth.js";
 import { parsePdf } from "../parsers/pdf.js";
 import { parseDocx } from "../parsers/docx.js";
 import { parsePptx } from "../parsers/pptx.js";
 
 export const uploadRouter = Router();
 uploadRouter.use(requireAuth);
+uploadRouter.use("/:courseId", requireCourseOwner);
 
 const upload = multer({ storage: multer.memoryStorage() });
 

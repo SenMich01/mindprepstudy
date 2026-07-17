@@ -1,4 +1,6 @@
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import pdfjs from "pdfjs-dist/legacy/build/pdf.js";
+
+const { getDocument } = pdfjs;
 
 /**
  * Extracts plain text from a PDF file buffer using pdfjs-dist.
