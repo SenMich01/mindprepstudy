@@ -7,18 +7,24 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState("sign-in"); // "sign-in" | "sign-up"
   const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
+    setNotice(null);
     setLoading(true);
 
-    const { error: authError } =
+    const { data, error: authError } =
       mode === "sign-in"
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
+        : await supabase.auth.signUp({
+            email,
+            password,
+            options: { emailRedirectTo: `${window.location.origin}/login` },
+          });
 
     setLoading(false);
 
@@ -27,12 +33,20 @@ export default function Login() {
       return;
     }
 
+    // With Confirm email enabled in Supabase, sign-up creates the user but does
+    // not issue a session until they use the confirmation link.
+    if (mode === "sign-up" && !data.session) {
+      setNotice("Check your inbox to confirm your email, then sign in.");
+      setMode("sign-in");
+      return;
+    }
+
     navigate("/courses");
   }
 
   return (
     <div className="container">
-      <h1>PrepMind</h1>
+      <h1>MindPrepStudy</h1>
       <p>Turn your notes into an exam-ready revision pack and quiz.</p>
 
       <form className="card" onSubmit={handleSubmit}>
@@ -51,6 +65,7 @@ export default function Login() {
           required
         />
         {error && <p style={{ color: "crimson" }}>{error}</p>}
+        {notice && <p style={{ color: "#166534" }}>{notice}</p>}
         <button type="submit" disabled={loading}>
           {loading ? "Please wait..." : mode === "sign-in" ? "Sign in" : "Sign up"}
         </button>

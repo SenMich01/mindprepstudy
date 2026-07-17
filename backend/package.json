@@ -1,8 +1,11 @@
 {
-  "name": "prepmind-backend",
+  "name": "mindprepstudy-backend",
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js"

@@ -1,4 +1,4 @@
-# PrepMind
+# MindPrepStudy
 
 AI-powered exam-prep copilot — upload lecture notes, slides, or PDFs and get a structured revision pack, predicted exam questions, and an auto-generated quiz that tracks your weak topics.
 
@@ -8,7 +8,7 @@ Built for OpenAI Build Week (July 2026) — Education track.
 
 - **App:** [add Render frontend URL]
 - **API:** [add Render backend URL]
-- **Demo account:** email `demo@prepmind.app` / password `[add]` (pre-seeded with a sample course, documents, revision pack, and quiz)
+- **Demo account:** email `[add]` / password `[add]` (pre-seeded with a sample course, documents, revision pack, and quiz)
 - **Demo video:** [add YouTube link]
 
 ## What it does
@@ -30,7 +30,7 @@ Built for OpenAI Build Week (July 2026) — Education track.
 ## Repo Structure
 
 ```
-prepmind/
+project-root/
 ├── sample-data/       # example notes in each supported format
 ├── frontend/          # React + Vite app
 └── backend/           # Express API (owns the OpenAI key, parsing, GPT-5.6 calls)
@@ -39,14 +39,14 @@ prepmind/
 ## Running Locally
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 22.13+
 - A free [Supabase](https://supabase.com) project
 - An [OpenAI API key](https://platform.openai.com/api-keys)
 
 ### 1. Clone and install
 ```bash
 git clone <this-repo-url>
-cd prepmind
+cd <repo-directory>
 
 cd backend && npm install
 cd ../frontend && npm install
@@ -54,8 +54,10 @@ cd ../frontend && npm install
 
 ### 2. Set up Supabase
 - Create a new Supabase project.
-- Run the SQL schema in `backend/schema.sql` (Supabase SQL editor → paste → run).
-- Copy your Project URL, anon key, and service role key from Supabase → Settings → API.
+- In **SQL Editor**, create a new query, paste the complete contents of `backend/schema.sql`, and select **Run**. A successful first run creates six tables and their Row Level Security policies.
+- From **Project Settings → API**, copy the Project URL, the browser-safe **anon** (or publishable) key, and the server-only **service_role** key. Do not put the service-role key in the frontend.
+- In **Authentication → URL Configuration**, set the Site URL to `http://localhost:5173` and add `http://localhost:5173/login` as a Redirect URL. Add the corresponding deployed URL and `/login` redirect URL before deploying.
+- In **Authentication → Providers → Email**, decide whether to require Confirm email. It can be disabled for the fastest local test; when enabled, MindPrepStudy shows a confirmation message and asks the user to sign in after using the email link.
 
 ### 3. Environment variables
 
@@ -91,7 +93,15 @@ cd frontend && npm run dev
 
 Frontend runs on `http://localhost:5173`, backend on `http://localhost:4000`.
 
-### 5. Try it with sample data
+### 5. Verify signup and authenticated API access
+1. Open `http://localhost:5173/login`, choose **Need an account? Sign up**, and use a new email address and a password of at least six characters.
+2. If email confirmation is disabled, the app should open **Your Courses** immediately. If it is enabled, open the confirmation email, then sign in with the same credentials.
+3. Create a course. Its creation and subsequent listing prove that the browser session was created, its access token was sent to the Express API, `requireAuth` validated it with Supabase, and the API wrote/read the course under the new user's ID.
+4. In Supabase **Authentication → Users**, confirm the account exists. In **Table Editor → courses**, confirm the new row has that account's `user_id`.
+
+If the SQL editor reports that a policy already exists, the schema has already been run in that project; do not rerun it unchanged. The table statements are safe to repeat, but the named policy creation statements are intentionally first-run setup.
+
+### 6. Try it with sample data
 Use the files in `/sample-data` to test uploads in each supported format (text, PDF, DOCX, PPTX) without needing your own course material.
 
 ## How Codex and GPT-5.6 were used

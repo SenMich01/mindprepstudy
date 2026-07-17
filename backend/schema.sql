@@ -1,4 +1,4 @@
--- PrepMind Supabase schema
+-- MindPrepStudy Supabase schema
 -- Run this in the Supabase SQL editor (Project -> SQL Editor -> New query -> paste -> Run)
 
 create extension if not exists "uuid-ossp";

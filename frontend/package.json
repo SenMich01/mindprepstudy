@@ -1,8 +1,11 @@
 {
-  "name": "prepmind-frontend",
+  "name": "mindprepstudy-frontend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
