@@ -118,7 +118,11 @@ input[type="radio"] { width: auto; margin: 0 .55rem 0 0; accent-color: #a94434; 
 .predicted-item strong { display: block; margin-bottom: .35rem; color: #4a3728; }
 .predicted-item p { margin: 0; color: #766863; font-size: .92rem; line-height: 1.55; }
 
-/* Accessibility: visible keyboard focus everywhere, respect reduced motion */
+/* Persistent top bar shown on every authenticated page (logout access) */
+.app-topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem min(2rem, 5vw); border-bottom: 1px solid #eadfd5; background: rgba(255,255,255,.7); backdrop-filter: blur(6px); position: sticky; top: 0; z-index: 10; }
+.app-topbar-brand { display: flex; align-items: center; gap: .6rem; font-weight: 700; color: #4a3728; }
+.app-topbar .brand-mark { display: grid; width: 1.9rem; height: 1.9rem; place-items: center; border-radius: 7px; background: #f4e0d4; color: #a94434; font-family: Fraunces, Georgia, serif; font-size: 1rem; font-weight: 700; }
+.app-logout { padding: .5rem .9rem; font-size: .85rem; }
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
   outline: 2px solid #a94434;
   outline-offset: 2px;

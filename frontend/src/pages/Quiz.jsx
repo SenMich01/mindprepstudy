@@ -10,11 +10,13 @@ export default function Quiz() {
   const [focusedPack, setFocusedPack] = useState(null);
   const [generatingFocusedPack, setGeneratingFocusedPack] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     apiFetch(`/quiz/${id}`)
       .then((data) => setQuestions(data.questions))
-      .catch((err) => setError(err.message));
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, [id]);
 
   function setAnswer(questionId, value) {
@@ -115,38 +117,48 @@ export default function Quiz() {
     <main className="container">
       <Link className="back-link" to={`/courses/${id}`}>← Back to course</Link>
       <header className="page-header"><div><p className="eyebrow">Self-check</p><h1>Knowledge check</h1><p className="subtitle">Take your time—your results will shape the next revision pack.</p></div></header>
-      <div className="quiz-meta"><span>✦ {questions.length} questions</span><span>•</span><span>Answer every question</span></div>
       {error && <p className="notice">{error}</p>}
 
-      <form onSubmit={handleSubmit}>
-        {questions.map((q) => (
-          <div className="card quiz-question" key={q.id}>
-            <span className="question-number">Question {questions.indexOf(q) + 1}</span>
-            <p className="question-text"><strong>{q.question}</strong></p>
-            {q.type === "mcq" ? (
-              q.options.map((opt) => (
-                <label className="answer-option" key={opt}>
+      {questions.length === 0 && !error && !loading ? (
+        <div className="empty-state">
+          No quiz yet for this course. Go back and click <strong>Generate quiz</strong> first — you'll need a revision pack in place before a quiz can be created.
+        </div>
+      ) : loading ? (
+        <p className="muted">Loading quiz...</p>
+      ) : (
+        <>
+          <div className="quiz-meta"><span>✦ {questions.length} questions</span><span>•</span><span>Answer every question</span></div>
+          <form onSubmit={handleSubmit}>
+            {questions.map((q) => (
+              <div className="card quiz-question" key={q.id}>
+                <span className="question-number">Question {questions.indexOf(q) + 1}</span>
+                <p className="question-text"><strong>{q.question}</strong></p>
+                {q.type === "mcq" ? (
+                  q.options.map((opt) => (
+                    <label className="answer-option" key={opt}>
+                      <input
+                        type="radio"
+                        name={q.id}
+                        value={opt}
+                        onChange={() => setAnswer(q.id, opt)}
+                      />{" "}
+                      {opt}
+                    </label>
+                  ))
+                ) : (
                   <input
-                    type="radio"
-                    name={q.id}
-                    value={opt}
-                    onChange={() => setAnswer(q.id, opt)}
-                  />{" "}
-                  {opt}
-                </label>
-              ))
-            ) : (
-              <input
-                type="text"
-                placeholder="Your answer"
-                onChange={(e) => setAnswer(q.id, e.target.value)}
-              />
-            )}
-          </div>
-        ))}
+                    type="text"
+                    placeholder="Your answer"
+                    onChange={(e) => setAnswer(q.id, e.target.value)}
+                  />
+                )}
+              </div>
+            ))}
 
-        {questions.length > 0 && <button type="submit">Submit answers →</button>}
-      </form>
+            {questions.length > 0 && <button type="submit">Submit answers →</button>}
+          </form>
+        </>
+      )}
     </main>
   );
 }

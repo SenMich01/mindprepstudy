@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./lib/AuthContext";
+import AppShell from "./components/AppShell";
 import Login from "./pages/Login";
 import CourseList from "./pages/CourseList";
 import CourseDetail from "./pages/CourseDetail";
@@ -9,7 +10,7 @@ function RequireAuth({ children }) {
   const { session, loading } = useAuth();
   if (loading) return <div className="container muted">Loading your study space...</div>;
   if (!session) return <Navigate to="/login" replace />;
-  return children;
+  return <AppShell>{children}</AppShell>;
 }
 
 function AppRoutes() {

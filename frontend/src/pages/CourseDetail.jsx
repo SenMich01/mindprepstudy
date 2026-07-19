@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 
 export default function CourseDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [course, setCourse] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [revisionPacks, setRevisionPacks] = useState([]);
   const [pastedText, setPastedText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
 
   async function load() {
@@ -87,6 +89,23 @@ export default function CourseDetail() {
     }
   }
 
+  async function handleDeleteCourse() {
+    const confirmed = window.confirm(
+      `Delete "${course.name}"? This removes all its documents, revision packs, and quizzes. This can't be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setError(null);
+    try {
+      await apiFetch(`/courses/${id}`, { method: "DELETE" });
+      navigate("/courses");
+    } catch (err) {
+      setError(err.message);
+      setDeleting(false);
+    }
+  }
+
   if (!course) return <div className="container muted">Opening course...</div>;
 
   const latestPack = revisionPacks[0];
@@ -96,6 +115,9 @@ export default function CourseDetail() {
       <Link className="back-link" to="/courses">← All courses</Link>
       <header className="page-header">
         <div><p className="eyebrow">Course workspace</p><h1>{course.name}</h1><p className="subtitle">Add your materials, then turn them into focused practice.</p></div>
+        <button className="button-secondary" onClick={handleDeleteCourse} disabled={deleting}>
+          {deleting ? "Deleting..." : "Delete course"}
+        </button>
       </header>
 
       <div className="detail-grid">

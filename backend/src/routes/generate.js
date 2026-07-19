@@ -64,7 +64,7 @@ generateRouter.post("/:courseId/pack", async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
     res.status(201).json({ revisionPack: data, reused: false });
   } catch (err) {
-    console.error("[generate] Revision pack failed:", err.message);
+    console.error("[generate] Revision pack failed:", err?.status, err?.message);
     res.status(502).json({ error: "Generation failed. Please try again in a moment." });
   }
 });
@@ -104,7 +104,7 @@ generateRouter.post("/:courseId/quiz", async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
     res.status(201).json({ questions: data });
   } catch (err) {
-    console.error("[generate] Quiz generation failed:", err.message);
+    console.error("[generate] Quiz generation failed:", err?.status, err?.message);
     res.status(502).json({ error: "Generation failed. Please try again in a moment." });
   }
 });

@@ -1,6 +1,12 @@
 import OpenAI from "openai";
 import "dotenv/config";
 
+if (!process.env.OPENAI_API_KEY) {
+  console.warn(
+    "[openai] Missing OPENAI_API_KEY — set it in the backend's environment variables (Render: Environment tab)."
+  );
+}
+
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Single choke point for all GPT-5.6 calls (per PRD Section 8).
@@ -22,7 +28,7 @@ export async function callGPT(params) {
   while (true) {
     try {
       const response = await client.chat.completions.create({
-        model: params.model || "gpt-5.6",
+        model: params.model || "gpt-5.6-terra",
         messages: params.messages,
         response_format: params.response_format,
         temperature: params.temperature ?? 0.4,
@@ -34,8 +40,14 @@ export async function callGPT(params) {
 
       if (!isRateLimit || attempt > MAX_RETRIES) {
         // Not a rate limit, or we've exhausted retries — bubble up.
-        // Caller (route handler) is responsible for surfacing a clear
-        // error state to the frontend rather than a silent failure.
+        // Log full detail here since this is the one place every GPT call
+        // passes through; route handlers only see a generic message.
+        console.error("[openai] Call failed:", {
+          status: err?.status,
+          message: err?.message,
+          code: err?.code,
+          type: err?.type,
+        });
         throw err;
       }
 
