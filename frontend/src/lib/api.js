@@ -8,16 +8,23 @@ export async function apiFetch(path, options = {}) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      ...(options.body instanceof FormData
-        ? {}
-        : { "Content-Type": "application/json" }),
-      Authorization: session ? `Bearer ${session.access_token}` : "",
-      ...options.headers,
-    },
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        ...(options.body instanceof FormData
+          ? {}
+          : { "Content-Type": "application/json" }),
+        Authorization: session ? `Bearer ${session.access_token}` : "",
+        ...options.headers,
+      },
+    });
+  } catch {
+    throw new Error(
+      "Could not reach the API. Check VITE_API_BASE_URL and confirm the backend service is live."
+    );
+  }
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));

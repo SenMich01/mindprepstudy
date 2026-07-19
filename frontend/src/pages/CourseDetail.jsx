@@ -138,6 +138,17 @@ export default function CourseDetail() {
                 {c.mnemonic && <p className="mnemonic"><em>Memory hook: {c.mnemonic}</em></p>}
               </div>
             ))}
+            {latestPack.content_json.predictedQuestions?.length > 0 && (
+              <div className="predicted-block">
+                <h4>Predicted questions</h4>
+                {latestPack.content_json.predictedQuestions.map((item, i) => (
+                  <div className="predicted-item" key={i}>
+                    <strong>{item.question}</strong>
+                    <p>{item.modelAnswer}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : <p className="muted">Your generated revision pack will appear here.</p>}
       </section>

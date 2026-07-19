@@ -44,7 +44,7 @@ export default function CourseList() {
       <header className="page-header">
         <div>
           <p className="eyebrow">Your study space</p>
-          <h1>Courses, made clearer.</h1>
+          <h1>Courses, <span className="highlight">made clearer.</span></h1>
           <p className="subtitle">Keep every lecture, revision pack, and quiz in one focused place.</p>
         </div>
         <div className="course-symbol">✦</div>

@@ -50,8 +50,8 @@ export default function Login() {
         <section className="auth-intro">
           <div className="brand"><span className="brand-mark">M</span> MindPrepStudy</div>
           <div className="auth-copy">
-            <p className="eyebrow" style={{ color: "#b9aefe" }}>Study with intention</p>
-            <h1>Your clearest path to exam day.</h1>
+            <p className="eyebrow" style={{ color: "#f3c9aa" }}>Study with intention</p>
+            <h1>Your <span className="highlight">clearest path</span> to exam day.</h1>
             <p>Turn lecture notes and course files into focused revision packs, smart quizzes, and a plan for what to study next.</p>
           </div>
         </section>
