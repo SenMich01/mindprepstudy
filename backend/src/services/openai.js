@@ -31,7 +31,9 @@ export async function callGPT(params) {
         model: params.model || "gpt-5.6-terra",
         messages: params.messages,
         response_format: params.response_format,
-        temperature: params.temperature ?? 0.4,
+        // Note: gpt-5.6-terra (and other reasoning-tier models) only support
+        // the default temperature (1) — passing any other value throws a
+        // 400 unsupported_value error. Omit it entirely rather than guess.
       });
       return response.choices[0].message.content;
     } catch (err) {
