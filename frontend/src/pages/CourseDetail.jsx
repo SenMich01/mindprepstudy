@@ -8,10 +8,13 @@ export default function CourseDetail() {
   const [course, setCourse] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [revisionPacks, setRevisionPacks] = useState([]);
+  const [quizCount, setQuizCount] = useState(0);
   const [pastedText, setPastedText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [busyAction, setBusyAction] = useState(null); // "pack" | "quiz" | null
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
+  const [status, setStatus] = useState(null);
 
   async function load() {
     try {
@@ -19,6 +22,15 @@ export default function CourseDetail() {
       setCourse(data.course);
       setDocuments(data.documents);
       setRevisionPacks(data.revisionPacks);
+
+      // Also check whether a quiz already exists for this course, so the
+      // "Take quiz" action can reflect real state instead of guessing.
+      try {
+        const quizData = await apiFetch(`/quiz/${id}`);
+        setQuizCount(quizData.questions?.length || 0);
+      } catch {
+        setQuizCount(0);
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -33,12 +45,14 @@ export default function CourseDetail() {
     if (!pastedText.trim()) return;
     setBusy(true);
     setError(null);
+    setStatus(null);
     try {
       await apiFetch(`/upload/${id}/text`, {
         method: "POST",
         body: JSON.stringify({ text: pastedText }),
       });
       setPastedText("");
+      setStatus("Notes added.");
       await load();
     } catch (err) {
       setError(err.message);
@@ -52,40 +66,64 @@ export default function CourseDetail() {
     if (!file) return;
     setBusy(true);
     setError(null);
+    setStatus(null);
     const formData = new FormData();
     formData.append("file", file);
     try {
       await apiFetch(`/upload/${id}/file`, { method: "POST", body: formData });
+      setStatus(`${file.name} added.`);
       await load();
     } catch (err) {
       setError(err.message);
     } finally {
       setBusy(false);
+      e.target.value = ""; // allow re-uploading the same file if needed
     }
   }
 
   async function handleGeneratePack() {
     setBusy(true);
+    setBusyAction("pack");
     setError(null);
+    setStatus(null);
     try {
-      await apiFetch(`/generate/${id}/pack`, { method: "POST", body: JSON.stringify({}) });
+      const data = await apiFetch(`/generate/${id}/pack`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      });
+      const conceptCount = data.revisionPack?.content_json?.concepts?.length || 0;
+      setStatus(
+        data.reused
+          ? "Showing your existing revision pack (no new documents since last time)."
+          : `Revision pack ready — ${conceptCount} concept${conceptCount === 1 ? "" : "s"} generated.`
+      );
       await load();
     } catch (err) {
       setError(err.message);
     } finally {
       setBusy(false);
+      setBusyAction(null);
     }
   }
 
   async function handleGenerateQuiz() {
     setBusy(true);
+    setBusyAction("quiz");
     setError(null);
+    setStatus(null);
     try {
-      await apiFetch(`/generate/${id}/quiz`, { method: "POST", body: JSON.stringify({}) });
+      const data = await apiFetch(`/generate/${id}/quiz`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      });
+      const count = data.questions?.length || 0;
+      setQuizCount(count);
+      setStatus(`Quiz ready — ${count} question${count === 1 ? "" : "s"} generated. Click "Take quiz" below.`);
     } catch (err) {
       setError(err.message);
     } finally {
       setBusy(false);
+      setBusyAction(null);
     }
   }
 
@@ -123,31 +161,59 @@ export default function CourseDetail() {
       <div className="detail-grid">
         <section className="card">
           <div className="section-title"><span className="section-icon">✎</span><div><h3>Add material</h3><p className="muted">Paste notes or upload a course file.</p></div></div>
-        <form onSubmit={handlePasteSubmit}>
-          <textarea
-            rows={4}
-            placeholder="Paste lecture notes here..."
-            value={pastedText}
-            onChange={(e) => setPastedText(e.target.value)}
-          />
-          <button type="submit" disabled={busy}>Add notes</button>
-        </form>
-        <p className="material-caption">Or upload a PDF, DOCX, or PPTX</p>
-        <input type="file" accept=".pdf,.docx,.pptx" onChange={handleFileUpload} disabled={busy} />
-        <p className="document-count">{documents.length} {documents.length === 1 ? "source" : "sources"} ready</p>
+          <form onSubmit={handlePasteSubmit}>
+            <textarea
+              rows={4}
+              placeholder="Paste lecture notes here..."
+              value={pastedText}
+              onChange={(e) => setPastedText(e.target.value)}
+            />
+            <button type="submit" disabled={busy}>Add notes</button>
+          </form>
+          <p className="material-caption">Or upload a PDF, DOCX, or PPTX</p>
+          <input type="file" accept=".pdf,.docx,.pptx" onChange={handleFileUpload} disabled={busy} />
+          <p className="document-count">{documents.length} {documents.length === 1 ? "source" : "sources"} ready</p>
         </section>
 
         <aside className="card card-accent">
           <div className="section-title"><span className="section-icon">✦</span><div><h3>Ready to revise?</h3><p className="muted">Create an AI-guided pack and quiz.</p></div></div>
           <div className="action-stack">
-            <button className="button-light" onClick={handleGeneratePack} disabled={busy || documents.length === 0}>{busy ? "Working..." : "Generate revision pack"}</button>
-            <button className="button-light" onClick={handleGenerateQuiz} disabled={busy || !latestPack}>Generate quiz</button>
-            <Link className="button button-light" to={`/courses/${id}/quiz`}>Take quiz →</Link>
+            <button
+              className="button-light"
+              onClick={handleGeneratePack}
+              disabled={busy || documents.length === 0}
+            >
+              {busyAction === "pack" ? "Generating pack..." : "Generate revision pack"}
+            </button>
+            {documents.length === 0 && (
+              <p className="hint">Add course material first (left panel) before generating a pack.</p>
+            )}
+
+            <button
+              className="button-light"
+              onClick={handleGenerateQuiz}
+              disabled={busy || !latestPack}
+            >
+              {busyAction === "quiz" ? "Generating quiz..." : "Generate quiz"}
+            </button>
+            {!latestPack && documents.length > 0 && (
+              <p className="hint">Generate a revision pack first — the quiz is built from it.</p>
+            )}
+
+            <Link
+              className={`button ${quizCount === 0 ? "button-disabled" : "button-light"}`}
+              to={quizCount > 0 ? `/courses/${id}/quiz` : "#"}
+              onClick={(e) => quizCount === 0 && e.preventDefault()}
+              aria-disabled={quizCount === 0}
+            >
+              {quizCount > 0 ? `Take quiz (${quizCount} questions) →` : "Take quiz →"}
+            </Link>
           </div>
+
+          {status && <p className="notice success">{status}</p>}
+          {error && <p className="notice">{error}</p>}
         </aside>
       </div>
-
-      {error && <p className="notice">{error}</p>}
 
       <section className="card">
         <div className="section-title"><span className="section-icon">▤</span><div><h3>Revision pack</h3><p className="muted">Your key concepts, explanations, and memory hooks.</p></div></div>
