@@ -170,8 +170,8 @@ export default function CourseDetail() {
             />
             <button type="submit" disabled={busy}>Add notes</button>
           </form>
-          <p className="material-caption">Or upload a PDF, DOCX, or PPTX</p>
-          <input type="file" accept=".pdf,.docx,.pptx" onChange={handleFileUpload} disabled={busy} />
+          <p className="material-caption">Or upload a PDF</p>
+          <input type="file" accept=".pdf,application/pdf" onChange={handleFileUpload} disabled={busy} />
           <p className="document-count">{documents.length} {documents.length === 1 ? "source" : "sources"} ready</p>
         </section>
 

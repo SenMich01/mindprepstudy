@@ -14,7 +14,7 @@ Built for OpenAI Build Week (July 2026) — Education track.
 ## What it does
 
 1. Create a Course.
-2. Upload notes as pasted text, PDF, DOCX, or PPTX slides.
+2. Upload notes as pasted text or a PDF.
 3. Generate a revision pack: key concepts, first-principles explanations, mnemonics, and predicted exam questions with model answers.
 4. Take an auto-generated quiz on the same material.
 5. See which topics you got wrong, and regenerate a focused mini revision pack targeting just those weak areas.
@@ -102,7 +102,7 @@ Frontend runs on `http://localhost:5173`, backend on `http://localhost:4000`.
 If the SQL editor reports that a policy already exists, the schema has already been run in that project; do not rerun it unchanged. The table statements are safe to repeat, but the named policy creation statements are intentionally first-run setup.
 
 ### 6. Try it with sample data
-Use the files in `/sample-data` to test uploads in each supported format (text, PDF, DOCX, PPTX) without needing your own course material.
+Use the files in `/sample-data` to test uploads (text and PDF) without needing your own course material. (`sample-notes.docx` and `sample-slides.pptx` are kept in that folder for reference but aren't used by the app — upload support is scoped to PDF for this build.)
 
 ## How Codex and GPT-5.6 were used
 
