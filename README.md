@@ -1,6 +1,6 @@
 # MindPrepStudy
 
-AI-powered exam-prep copilot — upload lecture notes, slides, or PDFs and get a structured revision pack, predicted exam questions, and an auto-generated quiz that tracks your weak topics.
+AI-powered exam-prep copilot — upload lecture PDFs and get a structured revision pack, predicted exam questions, and an auto-generated quiz that tracks your weak topics.
 
 Built for OpenAI Build Week (July 2026) — Education track.
 
