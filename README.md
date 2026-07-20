@@ -7,7 +7,7 @@ Built for OpenAI Build Week (July 2026) — Education track.
 ## Live Demo
 
 - **App:** https://mindprepstudyapp002.onrender.com
-- **API:** [add Render backend URL]
+- **API:** https://mindprepstudyapp001.onrender.com
 - **Demo account:** email `demo@prepmind.app` / password `000000` (pre-seeded with a sample course, documents, revision pack, and quiz)
 - **Demo video:** 
 
